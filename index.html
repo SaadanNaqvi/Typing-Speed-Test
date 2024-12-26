@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Typing Speed Test</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class = "content">
+    <div class="text-box">
+      <h2>Typing Speed Test</h2>
+      <div class="stats">
+        <h3 id="stopwatch">00:00:00</h3>
+        <h3 id="accuracy">Accuracy: 0%</h3>
+        <h3 id="speed">Speed: 0 WPM</h3>
+      </div>
+      <h3 id="text">Loading...</h3>
+      <textarea id="user_text" placeholder="Type Here"></textarea>
+      <div>
+        <button onclick="getText(api_url)">Start Typing</button>
+        <button onclick="submit()">Submit</button>
+      </div>
+    </div>
+
+    <div class="highscore">
+      <h2>Highscore</h2>
+      <table id="highscoreTable">
+        <tr>
+          <th>Rank</th>
+          <th>Username</th>
+          <th>Speed</th>
+          <th>Accuracy</th>
+        </tr>
+      </table>
+    </div>
+
+  </div>
+
+<script>
+  const text = document.getElementById('text');
+  const user_text = document.getElementById('user_text');
+  const api_url = 'http://metaphorpsum.com/paragraphs/1/2';
+  var username = prompt("Enter your username.");
+  var startTime;
+  var stopwatchInterval;
+  var text_length;
+  var text_words;
+
+  function initializeHighscores() 
+  {
+    const highscoreTable = document.getElementById("highscoreTable");
+    const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+    highscoreTable.innerHTML = `
+      <tr>
+        <th>Rank</th>
+        <th>Username</th>
+        <th>Speed</th>
+        <th>Accuracy</th>
+      </tr>`;
+    highscores.slice(0, 5).forEach((score, index) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${score.username}</td>
+        <td>${score.speed} WPM</td>
+        <td>${score.accuracy}%</td>`;
+      highscoreTable.appendChild(row);
+    });
+  }
+
+  document.addEventListener("keydown", (e) => {
+  if (e.key == "Enter")
+  {
+    event.preventDefault();
+    submit();
+  }});
+
+  async function getText(url) {
+    const response = await fetch(url);
+
+    var data = await response.text();
+    console.log(data);
+    text_length = data.length;
+    text_words = countWords(data);
+    console.log(text_length);
+
+
+    text.innerText = data;
+    if(document.getElementById("stopwatch").innerHTML === "00:00:00")
+    {
+      stopwatch();
+    }
+    else
+    {
+      document.getElementById('user_text').value = "";
+      resetStopwatch();
+      stopwatch();
+    }
+  }
+
+  function stopwatch(){
+    if (!stopwatchInterval) 
+    {
+      startTime = new Date().getTime()
+      stopwatchInterval = setInterval(updateStopwatch, 1000);
+    }
+  }
+
+  function updateStopwatch() 
+  {
+    var currentTime = new Date().getTime(); // get current time in milliseconds
+    var elapsedTime = currentTime - startTime; // calculate elapsed time in milliseconds
+    var seconds = Math.floor(elapsedTime / 1000) % 60; // calculate seconds
+    var minutes = Math.floor(elapsedTime / 1000 / 60) % 60; // calculate minutes
+    var hours = Math.floor(elapsedTime / 1000 / 60 / 60); // calculate hours
+    var displayTime = pad(hours) + ":" + pad(minutes) + ":" + pad(seconds); // format display time
+    document.getElementById("stopwatch").innerHTML = displayTime; // update the display
+  }
+
+  function pad(number) 
+  {
+    return (number < 10 ? '0' : '') + number; // add zero padding
+  }
+
+  function countWords(str) {
+    if (str.length === 0) {
+        return 0;
+    }
+    let wordCount = 0;
+    let state = 0; // Initial state is OUT
+
+    // Traverse all characters of the input string
+    for (let i = 0; i < str.length; i++) {
+        // Check for backslash first
+        if (str[i] === '\\') {
+            i++; // Skip next character (after backslash)
+            continue;
+        }
+
+        // If the current character is a word character
+        if (str[i].match(/[a-zA-Z0-9]/)) {
+            // If previous state was OUT, increment word count and change state to IN
+            if (state === 0) {
+                wordCount++;
+                state = 1;
+            }
+        }
+        // If the current character is not a word character
+        else {
+            // Change state to OUT
+            state = 0;
+        }
+    }
+
+    return wordCount;
+}
+
+  function resetStopwatch() 
+  {
+    stopStopwatch(); // stop the interval
+    document.getElementById("stopwatch").innerHTML = "00:00:00"; // reset the display
+  }
+
+  function stopStopwatch() 
+  {
+    clearInterval(stopwatchInterval); // stop the interval
+    stopwatchInterval = null; // reset the interval variable
+  }
+
+  function submit() 
+  {
+    var stopwatchtime = document.getElementById("stopwatch").innerHTML;
+    clearInterval(stopwatchInterval); // stop the interval
+    stopwatchInterval = null; // reset the interval variable
+
+    // Parse time components
+    var hours = parseInt(stopwatchtime.split(":")[0]);
+    var minutes = parseInt(stopwatchtime.split(":")[1]);
+    var seconds = parseInt(stopwatchtime.split(":")[2]);
+
+    // Convert time to total seconds
+    var totalTimeInSeconds = hours * 3600 + minutes * 60 + seconds;
+
+    if (totalTimeInSeconds === 0) {
+      alert("Error: Total time is 0 seconds. Make sure you start typing!");
+      return;
+    }
+
+    // Get user input
+    var userInput = user_text.value;
+    var originalText = text.innerText;
+
+    // Calculate accuracy
+    var correctCharacters = 0;
+    for (let i = 0; i < userInput.length; i++) {
+      if (userInput[i] === originalText[i]) {
+        correctCharacters++;
+      }
+    }
+    var accuracy = (correctCharacters / originalText.length) * 100;
+
+    // Calculate typing speed
+    var typingSpeedWPS = userInput.length / totalTimeInSeconds; // Characters per second
+    var typingSpeedWPM = countWords(userInput) / (totalTimeInSeconds / 60); // Words per minute
+
+    // Display results
+    alert(
+      "Your typing speed is " +
+        typingSpeedWPS.toFixed(2) +
+        " characters per second and " +
+        typingSpeedWPM.toFixed(2) +
+        " words per minute.\n" +
+        "Your accuracy is " +
+        accuracy.toFixed(2) +
+        "%."
+    );
+    saveHighscore(username, typingSpeedWPM.toFixed(2), accuracy.toFixed(2));
+    initializeHighscores();
+  }
+
+  function saveHighscore(username, speed, accuracy) 
+  {
+      const highscores = JSON.parse(localStorage.getItem("highscores")) || [];
+      highscores.push({ username, speed, accuracy });
+      highscores.sort((a, b) => b.speed - a.speed || b.accuracy - a.accuracy);
+      localStorage.setItem("highscores", JSON.stringify(highscores.slice(0, 5))); // Only keep top 5
+  }
+
+user_text.addEventListener("input", () => {
+    var userInput = user_text.value;
+    var originalText = text.innerText;
+
+    var correctCharacters = 0;
+    for (let i = 0; i < userInput.length; i++) {
+        if (userInput[i] === originalText[i]) {
+          correctCharacters++;
+        }
+    }
+    var accuracy = (correctCharacters / originalText.length) * 100;
+
+    var elapsedTime = (new Date().getTime() - startTime) / 1000; // Time in seconds
+    var typingSpeedWPS = userInput.length / elapsedTime; // Characters per second
+    var typingSpeedWPM = countWords(userInput) / (elapsedTime / 60); // Words per minute
+
+    // Update metrics on the screen
+    document.getElementById("accuracy").innerText = "Accuracy: " + accuracy.toFixed(2) + "%";
+    document.getElementById("speed").innerText = "Speed: " + typingSpeedWPM.toFixed(2) + " WPM";
+});
+
+
+getText(api_url);
+initializeHighscores(); 
+
+
+</script>
+</body>
+</html>
+
+

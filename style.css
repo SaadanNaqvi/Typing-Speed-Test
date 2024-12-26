@@ -1,0 +1,107 @@
+*{
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    box-sizing: border-box;
+}
+
+body{
+    background: #bbc6fa;
+}
+
+.text-box{
+    background: #fff;
+    width: 700px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 10px 20px 0px rgba(0, 0, 0, 0.15);
+}
+
+.highscore{
+    background: #fff;
+    width: 700px;
+    position: absolute;
+    top: 110%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 40px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 10px 20px 0px rgba(0, 0, 0, 0.15);
+}
+.highscore tr th{
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.text-box h2{
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 40px;
+    position: relative;
+}
+.text-box h2::after{
+    content: '';
+    width: 80px;
+    height: 3px;
+    border-radius: 3px;
+    background: rgb(23, 124, 229);
+    position: absolute;
+    display: block;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.text-box h3{
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.text-box textarea
+{
+    font-size: 26px;
+    min-height: 110px;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.text-box textarea::before, .quote-box textarea::after{
+    content: '"';
+}
+
+.text-box div{
+    width: 100%;
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+.text-box button{
+    background: rgb(23, 124, 229);
+    color: #fff;
+    border: 1px solid rgb(23, 124, 229);
+    border-radius: 25px;
+    width: 150px;
+    height: 50px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.stats
+{
+    gap: 40px;
+    display: flex;
+    justify-content: center;
+    margin: 10px;
+    margin-top: 20px;
+}
