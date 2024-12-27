@@ -93,8 +93,5 @@ This Typing Speed Test application is a web-based tool designed to measure a use
 
 ---
 
-## Author
-[Your Name]
-
 This project is a beginner-friendly implementation to practice JavaScript, DOM manipulation, and web application development.
 
