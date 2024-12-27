@@ -87,6 +87,7 @@
 
 
     text.innerText = data;
+    user_text.disabled = false;
     if(document.getElementById("stopwatch").innerHTML === "00:00:00")
     {
       stopwatch();
@@ -97,6 +98,7 @@
       resetStopwatch();
       stopwatch();
     }
+    
   }
 
   function stopwatch(){
@@ -227,26 +229,64 @@
       localStorage.setItem("highscores", JSON.stringify(highscores.slice(0, 5))); // Only keep top 5
   }
 
-user_text.addEventListener("input", () => {
+  user_text.addEventListener("input", () => {
     var userInput = user_text.value;
     var originalText = text.innerText;
 
     var correctCharacters = 0;
+    var highlightedText = ""; // Text with color-coded feedback
+
     for (let i = 0; i < userInput.length; i++) {
         if (userInput[i] === originalText[i]) {
-          correctCharacters++;
+            correctCharacters++;
+            highlightedText += `<span style="color: green;">${originalText[i]}</span>`;
+        } else {
+            highlightedText += `<span style="color: red;">${originalText[i]}</span>`;
         }
     }
-    var accuracy = (correctCharacters / originalText.length) * 100;
 
+    // Append remaining untyped text in default color
+    highlightedText += originalText.slice(userInput.length);
+
+    // Update the displayed text with color coding
+    text.innerHTML = highlightedText;
+
+    // Calculate accuracy
+    var accuracy = (correctCharacters / userInput.length) * 100 || 0;
+
+    // Calculate typing speed
     var elapsedTime = (new Date().getTime() - startTime) / 1000; // Time in seconds
-    var typingSpeedWPS = userInput.length / elapsedTime; // Characters per second
     var typingSpeedWPM = countWords(userInput) / (elapsedTime / 60); // Words per minute
 
     // Update metrics on the screen
     document.getElementById("accuracy").innerText = "Accuracy: " + accuracy.toFixed(2) + "%";
     document.getElementById("speed").innerText = "Speed: " + typingSpeedWPM.toFixed(2) + " WPM";
-});
+
+    // Check if the typing is complete
+    if (userInput.length === originalText.length) {
+        stopStopwatch(); // Stop the timer
+
+        // Display final stats
+        alert(
+            "Typing complete!\n" +
+            "Your typing speed is " +
+            typingSpeedWPM.toFixed(2) +
+            " words per minute.\n" +
+            "Your accuracy is " +
+            accuracy.toFixed(2) +
+            "%."
+        );
+
+        // Disable input to prevent further typing
+        user_text.disabled = true;
+
+        // Save highscore and update the leaderboard
+        saveHighscore(username, typingSpeedWPM.toFixed(2), accuracy.toFixed(2));
+        initializeHighscores();
+    }
+  });
+
+
 
 
 getText(api_url);
@@ -256,5 +296,3 @@ initializeHighscores();
 </script>
 </body>
 </html>
-
-
